@@ -1,0 +1,21 @@
+{
+  "name": "leasing-tools",
+  "owner": {
+    "name": "Leasing Tools"
+  },
+  "description": "Leasing workflow tools for commercial real estate.",
+  "plugins": [
+    {
+      "name": "vts-toolkit",
+      "source": "./vts-toolkit",
+      "description": "Run the biweekly VTS leasing update from a spreadsheet \u2014 push comments, stage moves and new deals back into VTS, then re-export a clean landlord report.",
+      "category": "cre",
+      "tags": [
+        "vts",
+        "leasing",
+        "reporting",
+        "cre"
+      ]
+    }
+  ]
+}
