@@ -174,6 +174,22 @@ VTS would be unrecoverable.
 - **Your account details stay on your machine.** Setup writes them to a local config file; nothing
   account-specific is baked into the plugin, so updates never overwrite your setup.
 
+## Keeping it up to date
+
+Turn on auto-updates once and you'll get fixes automatically:
+
+`/plugin` → **Marketplaces** → select `leasing-tools` → **Enable auto-update**
+
+Worth doing — third-party plugins like this one don't auto-update by default. Claude Code then
+refreshes in the background shortly after startup and tells you when to run `/reload-plugins`.
+
+To pull an update right now, just ask Claude to *"update the VTS toolkit"*, or run:
+
+```
+claude plugin marketplace update leasing-tools
+claude plugin install vts-toolkit@leasing-tools
+```
+
 ## Stuck? Ask Claude — that's the support line
 
 Claude has the troubleshooting guide built in, including the Windows-specific snags. Paste the
