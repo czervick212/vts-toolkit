@@ -1,11 +1,7 @@
 # VTS Leasing Toolkit
 
-The biweekly leasing update, done once instead of twice.
-
-Today the same information gets typed into two places: the Excel report the landlord sees, and
-then again through dozens of comment modals in VTS. This turns that into a single edit — you
-update the spreadsheet, and Claude pushes your changes into VTS and hands back a clean report to
-send out.
+We all hate using VTS. This makes it easier. Write your comments on an old leasing update and
+call it a day.
 
 ---
 
@@ -58,9 +54,8 @@ Everything after this point is written for the human.
 
 ## There's nothing to download
 
-This isn't a program you install and open. It's an add-on (a "plugin") for **Claude Code**.
-You hand Claude a link and it fetches everything for you — no files, no unzipping, no GitHub
-account needed.
+It's an add-on (a "plugin") for **Claude Code**, not a program you install and open. You hand
+Claude a link and it fetches everything — no files, no unzipping, no GitHub account needed.
 
 ## What you need first
 

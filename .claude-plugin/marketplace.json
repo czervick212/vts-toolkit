@@ -8,7 +8,7 @@
     {
       "name": "vts-toolkit",
       "source": "./vts-toolkit",
-      "description": "Run the biweekly VTS leasing update from a spreadsheet \u2014 push comments, stage moves and new deals back into VTS, then re-export a clean landlord report.",
+      "description": "We all hate using VTS. Write your comments on an old leasing update and call it a day \u2014 Claude pushes them into VTS and returns a clean report.",
       "category": "cre",
       "tags": [
         "vts",
