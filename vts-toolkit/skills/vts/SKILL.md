@@ -171,29 +171,49 @@ VTS standardizes new tenant names against its company directory. `IKEA` came bac
 exact-name matching in Step 3 — so after creating deals, read the list back and match on
 VTS's spelling, not the spreadsheet's.
 
-## Step 1 — Locate the property folder
+## Step 1 — Get the two inputs
 
-If config has a `folder` for this property, use it. Otherwise search under `paths.landlord_root`
-— depth varies (some properties sit directly under a landlord, some are nested), so search rather
-than assume:
+The whole loop needs exactly two things:
 
-```bash
-python3 "${CLAUDE_PLUGIN_ROOT}/lib/vts_paths.py" find-folders "<landlord_root>" \
-  --name "Leasing Updates" --match "<property>"
-```
+1. **Which property** — the argument, resolved to a VTS id in Step 0
+2. **Their edited spreadsheet** — the file they typed comments into
 
-If that misses, list the landlord folders and match by eye — the property may be named differently
-on disk than in VTS. Once found, record it so the next run skips the search:
+Nothing else. In particular **do not go looking for folders on disk.** Most people never keep
+leasing reports: they export, email the landlord, and delete. Searching a Dropbox tree that
+doesn't exist wastes their time and makes the tool look broken.
 
-```bash
-python3 "${CLAUDE_PLUGIN_ROOT}/lib/vts_config.py" add-property "<name>" <id> --folder "<path>"
-```
+**Just ask for the file.** Something like:
+
+> Drop your edited leasing report in here (drag the file into the chat), or paste the path.
+
+That's the reliable route, and it works no matter how they file things.
+
+Only look on disk when you already know where to look:
+
+- **Config has a `folder` for this property** — check there first with
+  `vts_paths.py newest "<folder>"` and offer what you find: *"Is this the one — Somerville
+  Leasing Update 8.31.26.xlsx?"*
+- **They mention they just downloaded it** — `vts_paths.py downloads --all` lists recent
+  exports newest-first.
+
+If neither applies, ask. Don't guess, and don't crawl.
 
 Then open the property's deal pipeline in VTS:
 
 ```
 https://app.vts.com/lease/deals?properties=<PROPERTY_ID>&page=1
 ```
+
+### If they do keep reports in a folder
+
+Some people file every cycle's report per property. If they mention a folder, or one turns up,
+record it so future runs skip the asking entirely:
+
+```bash
+python3 "${CLAUDE_PLUGIN_ROOT}/lib/vts_config.py" add-property "<name>" <id> --folder "<path>"
+```
+
+This is a convenience, never a requirement. A property with no folder works exactly the same.
 
 ### Finding a property that isn't in config
 
@@ -247,11 +267,8 @@ python3 "${CLAUDE_PLUGIN_ROOT}/skills/vts/scripts/plan_changes.py" \
   "<their edited report>.xlsx" "<fresh export>.xlsx"
 ```
 
-Their edited report is the newest `.xlsx` in the property's leasing-updates folder:
-
-```bash
-python3 "${CLAUDE_PLUGIN_ROOT}/lib/vts_paths.py" newest "<leasing updates folder>"
-``` The fresh export
+The edited report is whatever they handed you in Step 1. The fresh export is ground truth, so
+anything that differs in their file is a pending edit. The fresh export
 is ground truth, so anything that differs in their file is a pending edit.
 
 The plan comes back in four buckets:
@@ -340,23 +357,37 @@ If the deal also has a comment, post it after creating, via Step 5.
 
 Re-export from VTS (Step 2 again) so the report reflects everything just pushed, then:
 
+**The destination is optional.** If you don't give one, the finished report lands next to the
+export — normally Downloads — named from the property. That is the right default: most people
+email it to the landlord and delete it.
+
 ```bash
-python3 "${CLAUDE_PLUGIN_ROOT}/skills/vts/scripts/finalize_report.py" \
-  "<fresh export>.xlsx" "<leasing updates folder>"
+python3 "${CLAUDE_PLUGIN_ROOT}/skills/vts/scripts/finalize_report.py" "<fresh export>.xlsx"
 ```
 
-This deletes the Overview sheet and names the file to match the folder's existing convention —
-that's the whole of the manual post-processing. The deals sheet is left untouched because its
-formatting is already what gets sent.
+If config has a `folder` for this property, pass it and the report is filed there instead:
 
-Naming differs by property, which is why the convention is copied from the newest file present
-rather than hardcoded. Shapes seen in the wild:
+```bash
+python3 "${CLAUDE_PLUGIN_ROOT}/skills/vts/scripts/finalize_report.py" \
+  "<fresh export>.xlsx" "<their folder>"
+```
 
-- `1200 Main St Leasing Update 8.3.26.xlsx` — street address
-- `Riverside Commons Leasing Update 12.2.25.xlsx` — property name
-- `Leasing Status Report 9.22.25.xlsx` — generic, sometimes dash-separated
+Either way it deletes the Overview sheet and names the file — the whole of the manual
+post-processing. The deals sheet is left untouched because its formatting is already what gets
+sent.
 
-Use `--dry-run` first if anything about the naming looks uncertain. If a file with the target name
+Naming, in precedence order:
+
+1. `--name "<Property>"` if you pass one
+2. In a folder they chose that already holds past reports, the newest one's convention, so
+   per-property habits survive (`1200 Main St Leasing Update 8.3.26.xlsx` for one property,
+   `Leasing Status Report 9.22.25.xlsx` for another)
+3. Otherwise the property name read out of the workbook itself
+
+Raw `leasing-activity-*.xlsx` downloads are never treated as prior reports, so a Downloads folder
+full of exports can't drag the naming back to VTS's filename.
+
+Use `--dry-run` to see the name and destination before writing. If a file with the target name
 already exists it's moved aside rather than overwritten.
 
 Finish by reporting what landed: counts of comments posted, stages moved, deals created, and where
@@ -464,7 +495,8 @@ deal was last worked.
 
 - `parse_report.py <file.xlsx> [--json]` — parse an export or saved report into structured deals
 - `plan_changes.py <edited.xlsx> <fresh.xlsx> [--json]` — diff and produce the change plan
-- `finalize_report.py <raw.xlsx> <folder> [--date M.D.YY] [--dry-run]` — strip Overview, name, save
+- `finalize_report.py <raw.xlsx> [folder] [--out DIR] [--name …] [--date M.D.YY] [--dry-run]` —
+  strip Overview, name, save; destination optional
 
 **Setup / diagnostics** — `${CLAUDE_PLUGIN_ROOT}/scripts/`:
 

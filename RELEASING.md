@@ -46,6 +46,7 @@ Simplest thing to tell a user: *"ask Claude to update the VTS toolkit."* It can 
 
 | Version | Change |
 |---|---|
+| 0.4.0 | Folders optional everywhere — inputs are just the property + the edited file |
 | 0.3.0 | Archive properties you've finished leasing, so they stop cluttering the list |
 | 0.2.1 | Property identity keyed on VTS id, not name — two assets can share a name |
 | 0.2.0 | Columns located by header label instead of fixed position; section headings detected structurally (fixes a phantom deal and misfiled stages) |

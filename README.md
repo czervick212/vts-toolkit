@@ -152,12 +152,17 @@ As it works, Claude asks permission to run a few commands — that's normal. Cli
 Or just say *"run the leasing update for Fairfax Propane"* — you don't have to remember the exact
 command.
 
-What happens:
+It asks you to drop in your edited spreadsheet, then:
 
 1. Exports the current state from VTS — that's the ground truth
-2. Diffs it against the report you edited, and shows you **exactly what it's about to change**
+2. Diffs it against the file you edited, and shows you **exactly what it's about to change**
 3. On your OK: posts your comments, moves stages, creates any new deals you added
 4. Re-exports and formats the finished report for the landlord
+
+**You don't need to save reports anywhere.** If you export, send it to the landlord and delete it
+— that's the normal case. Hand over whichever file you edited and the finished one comes back in
+your Downloads. If you *do* keep a folder per property, tell Claude once and it files them there
+instead.
 
 **It always shows you the plan before writing anything.** These changes land in a client's system
 of record with your name on the audit trail, so nothing gets pushed until you say go.

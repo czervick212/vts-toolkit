@@ -113,45 +113,46 @@ write the config JSON directly rather than using `set`.
 
 Tell them how many properties came back. If it's a surprising number, that's worth catching now.
 
-## Phase 5 — Find their report folders
+## Phase 5 — Where reports live (optional — often "nowhere")
 
-`/vts` reads the edited report from a per-property folder and writes the finished one back beside
-it. List the cloud-sync roots that exist on this machine:
+**Ask before searching, and be ready for "I don't keep them."**
+
+> When you finish a leasing report, do you save it somewhere — a folder per property — or do you
+> just send it to the landlord and move on?
+
+Both answers are fine and the toolkit works identically. **Most people don't keep them**, and
+that is the expected answer, not a problem. If they don't:
+
+- Skip this phase entirely. Say so plainly: *"No problem — I'll ask you for the file each time,
+  and the finished report will land in your Downloads."*
+- Do **not** go crawling Dropbox for folders that don't exist. That was an early mistake: it
+  produced a run of failed searches that made the tool look broken before it had done anything.
+
+If they *do* file reports per property, record where, so future runs skip the asking:
 
 ```bash
 python3 "${CLAUDE_PLUGIN_ROOT}/lib/vts_paths.py" roots
+python3 "${CLAUDE_PLUGIN_ROOT}/lib/vts_paths.py" find-folders "<root>" --name "<their folder name>"
 ```
 
-Then search each for leasing-update folders:
-
-```bash
-python3 "${CLAUDE_PLUGIN_ROOT}/lib/vts_paths.py" find-folders "<root>" --name "Leasing Updates"
-```
-
-If their folders use a different word, pass `--name "<whatever they use>"`. If nothing turns up,
-just ask — the skill handles any layout as long as it knows the root.
+Their folders may not be called "Leasing Updates" — ask what they use and pass `--name`.
 
 ```bash
 python3 "${CLAUDE_PLUGIN_ROOT}/lib/vts_config.py" set paths.landlord_root "<their root>"
-```
-
-Attach folders to the properties you can match, so `/vts <property>` goes straight there:
-
-```bash
 python3 "${CLAUDE_PLUGIN_ROOT}/lib/vts_config.py" add-property "<name>" <id> --folder "<path>"
 ```
 
-**A caution worth raising if their folders are cloud-synced:** files that haven't been downloaded
-locally can show as 0 bytes, and a report that reads as empty produces a diff claiming every deal
-is new. If a folder looks oddly empty, have them open it in Finder/Explorer once to materialize it
-before relying on it.
+**If their folders are cloud-synced**, mention that files which haven't downloaded show as 0
+bytes — a report that reads as empty produces a diff claiming every deal is new. The toolkit
+catches it, but it's worth knowing.
 
 ## Phase 6 — Rehearsal (this is the point)
 
 Everything above is configuration. This is where they watch it actually work — a complete pass
 through the real loop on their own data that **writes nothing to VTS**.
 
-Pick a property that has both an existing report and deals in VTS.
+Pick any property with deals in VTS. **No saved report needed** — the rehearsal works whether or
+not they keep them.
 
 **6a. Read their deals back.** Proves the session and the property ID together:
 
@@ -186,14 +187,26 @@ python3 "${CLAUDE_PLUGIN_ROOT}/skills/vts/scripts/parse_report.py" "<the export>
 Should print the property title, the as-of date, and a deal count matching 6a. If the count
 disagrees with VTS, the export was filtered differently — sort that out now, not mid-run.
 
-**6d. Diff it against their existing report:**
+**6d. Prove the diff.**
+
+If they have an edited or previously-sent report to hand, diff it against the fresh export — the
+real thing:
 
 ```bash
-python3 "${CLAUDE_PLUGIN_ROOT}/lib/vts_paths.py" newest "<their leasing updates folder>"
-python3 "${CLAUDE_PLUGIN_ROOT}/skills/vts/scripts/plan_changes.py" "<newest>" "<the export>"
+python3 "${CLAUDE_PLUGIN_ROOT}/skills/vts/scripts/plan_changes.py" "<their report>" "<the export>"
 ```
 
-Interpret the result with them — this is the part worth their attention:
+**If they don't keep reports, diff the export against itself.** It should report zero changes in
+every bucket, which proves the machinery end-to-end and is a genuinely useful demonstration:
+
+```bash
+python3 "${CLAUDE_PLUGIN_ROOT}/skills/vts/scripts/plan_changes.py" "<the export>" "<the export>"
+```
+
+Then explain the real shape: *"Next cycle you'll edit the comments in this file and hand it back
+to me — everything that differs gets pushed."*
+
+Interpret whatever you get with them:
 
 - **Everything empty** — expected if their saved report is already in sync. The loop works; there's
   just nothing pending. Good outcome.
@@ -206,13 +219,12 @@ Interpret the result with them — this is the part worth their attention:
 **6e. Rehearse the finish**, which is genuinely non-destructive:
 
 ```bash
-python3 "${CLAUDE_PLUGIN_ROOT}/skills/vts/scripts/finalize_report.py" \
-  "<the export>" "<their leasing updates folder>" --dry-run
+python3 "${CLAUDE_PLUGIN_ROOT}/skills/vts/scripts/finalize_report.py" "<the export>" --dry-run
 ```
 
-Shows the sheet it would strip and the filename it would write, having copied their existing naming
-convention. If the proposed name doesn't match how they name reports, say so — that convention is
-inferred from the newest file in the folder, so an odd file in there can throw it.
+Shows the sheet it would strip, the filename, and where it would land — Downloads, unless they
+gave a folder in Phase 5, in which case pass that folder too. Ask whether the proposed filename
+is what they'd want to send a landlord; `--name "<Property>"` overrides it.
 
 **Stop here. Do not push anything.** The rehearsal ends before any write.
 
@@ -253,7 +265,7 @@ a confusing error mid-run later.
 Then tell them, briefly:
 
 - Who they're signed in to VTS as
-- How many properties were found, and how many have a report folder attached
+- How many properties were found (and, only if they file reports, how many have a folder)
 - What the rehearsal showed (in sync / N pending edits / a mismatch caught)
 - That the command is `/vts <property name>`, or plain English like *"run the leasing update for
   Main Street Plaza"*

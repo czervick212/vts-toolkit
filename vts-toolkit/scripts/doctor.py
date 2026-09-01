@@ -134,8 +134,8 @@ def run():
     # --- paths -----------------------------------------------------------
     root = cfg.get("paths", {}).get("landlord_root")
     if not root:
-        check("Report folder", WARN, "not set",
-              "Run /vts-setup so it doesn't have to hunt for your reports each time.")
+        # Optional by design: plenty of people never save leasing reports.
+        check("Report folder", OK, "not set (fine — reports go to Downloads)")
     elif not Path(root).expanduser().is_dir():
         check("Report folder", FAIL, f"can't be found: {root}",
               "The folder may have been moved or renamed, or a cloud folder may not "
