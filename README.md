@@ -174,6 +174,12 @@ VTS would be unrecoverable.
 - **Your account details stay on your machine.** Setup writes them to a local config file; nothing
   account-specific is baked into the plugin, so updates never overwrite your setup.
 
+## Finished with a property?
+
+VTS gives you no way to hide an asset once you've leased it, so the list only grows and the deals
+you're actually working get buried. Tell Claude *"archive Rockville BMW"* and it drops out of the
+toolkit's list. Nothing changes in VTS — this is local. *"Unarchive"* brings it back.
+
 ## Keeping it up to date
 
 Turn on auto-updates once and you'll get fixes automatically:
@@ -187,7 +193,7 @@ To pull an update right now, just ask Claude to *"update the VTS toolkit"*, or r
 
 ```
 claude plugin marketplace update leasing-tools
-claude plugin install vts-toolkit@leasing-tools
+claude plugin update vts-toolkit@leasing-tools
 ```
 
 ## Stuck? Ask Claude — that's the support line

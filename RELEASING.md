@@ -32,8 +32,11 @@ Anyone who hasn't enabled it can pull an update on demand:
 
 ```bash
 claude plugin marketplace update leasing-tools
-claude plugin update vts-toolkit
+claude plugin update vts-toolkit@leasing-tools
 ```
+
+The plugin name must carry its marketplace (`vts-toolkit@leasing-tools`). The bare name
+reports `Plugin "vts-toolkit" not found`.
 
 Then restart Claude Code, or run `/reload-plugins`.
 
@@ -43,6 +46,7 @@ Simplest thing to tell a user: *"ask Claude to update the VTS toolkit."* It can 
 
 | Version | Change |
 |---|---|
+| 0.3.0 | Archive properties you've finished leasing, so they stop cluttering the list |
 | 0.2.1 | Property identity keyed on VTS id, not name — two assets can share a name |
 | 0.2.0 | Columns located by header label instead of fixed position; section headings detected structurally (fixes a phantom deal and misfiled stages) |
 | 0.1.0 | Initial release |

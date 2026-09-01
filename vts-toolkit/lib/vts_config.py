@@ -11,6 +11,8 @@ Usage:
     python3 lib/vts_config.py add-property "Main Street Plaza" 100200 \
         --address "Bethesda, MD" --folder "~/Dropbox/Landlords/.../Leasing Updates"
     python3 lib/vts_config.py find-property "fairfax"
+    python3 lib/vts_config.py archive "Rockville BMW"     # hide a property you've leased
+    python3 lib/vts_config.py list-properties [--all]
 """
 import json
 import os
@@ -117,13 +119,33 @@ def add_property(cfg, name, prop_id, address=None, folder=None):
     return entry
 
 
-def find_property(cfg, query):
+def find_property(cfg, query, include_archived=False):
+    """Resolve a name or address fragment to properties.
+
+    Archived properties are excluded unless asked for. VTS has no way to hide an asset
+    you've finished leasing, so a broker's list only ever grows and the ones they still
+    work get buried. Archiving is local to this toolkit — it changes nothing in VTS.
+    """
     q = query.lower().strip()
-    props = cfg.get("properties", [])
+    props = [p for p in cfg.get("properties", [])
+             if include_archived or not p.get("archived")]
     exact = [p for p in props if p["name"].lower() == q]
     if exact:
         return exact
     return [p for p in props if q in p["name"].lower() or q in p.get("address", "").lower()]
+
+
+def set_archived(cfg, query, archived=True):
+    """Archive/unarchive by name, address, or id. Returns the entries changed."""
+    q = str(query).lower().strip()
+    changed = []
+    for p in cfg.get("properties", []):
+        if str(p["id"]) == q or p["name"].lower() == q or q in p["name"].lower():
+            p["archived"] = bool(archived)
+            if not archived:
+                p.pop("archived", None)
+            changed.append(p)
+    return changed
 
 
 def main(argv):
@@ -169,9 +191,26 @@ def main(argv):
         return 0
 
     if cmd == "find-property":
-        hits = find_property(cfg, " ".join(rest))
+        include = "--all" in rest
+        hits = find_property(cfg, " ".join(a for a in rest if a != "--all"), include)
         print(json.dumps(hits, indent=2))
         return 0 if hits else 3
+
+    if cmd in ("archive", "unarchive"):
+        changed = set_archived(cfg, " ".join(rest), archived=(cmd == "archive"))
+        if not changed:
+            print(f"no property matched: {' '.join(rest)}", file=sys.stderr)
+            return 3
+        save(cfg)
+        print(json.dumps(changed, indent=2))
+        return 0
+
+    if cmd == "list-properties":
+        include = "--all" in rest
+        props = [p for p in cfg.get("properties", [])
+                 if include or not p.get("archived")]
+        print(json.dumps(props, indent=2))
+        return 0
 
     print(f"unknown command: {cmd}", file=sys.stderr)
     return 1

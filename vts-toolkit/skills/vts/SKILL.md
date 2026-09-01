@@ -476,6 +476,14 @@ deal was last worked.
 - `show` — print config (exit 2 = not set up)
 - `find-property "<query>"` — resolve a name to an ID
 - `add-property "<name>" <id> [--address …] [--folder …]` — record a property
+- `list-properties [--all]` — the working list; `--all` includes archived
+- `archive "<name|id>"` / `unarchive "<name|id>"` — hide a property that's done
+
+**Archiving is how the user prunes their list.** VTS has no way to hide an asset once it's
+leased, so the sidebar only ever grows and live deals get buried among finished ones. Archiving
+is local to this toolkit and changes nothing in VTS. When someone says a property is leased,
+done, or no longer theirs, offer to archive it — and if they ask for a property that's archived,
+`find-property --all` still finds it.
 - `set <key> <value> …` — dotted keys, e.g. `user.id 12345`
 
 **Paths** — `${CLAUDE_PLUGIN_ROOT}/lib/vts_paths.py` (works identically on Windows and macOS):
