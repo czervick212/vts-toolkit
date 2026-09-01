@@ -14,7 +14,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 ROOT = Path(os.environ.get("CLAUDE_PLUGIN_ROOT") or HERE.parent)
-DATA = Path(os.environ.get("CLAUDE_PLUGIN_DATA") or Path.home() / ".vts-toolkit")
+DATA = Path(os.environ.get("VTS_TOOLKIT_HOME") or Path.home() / ".vts-toolkit")
 sys.path.insert(0, str(ROOT / "lib"))
 
 OK, WARN, FAIL = "ok", "warn", "fail"

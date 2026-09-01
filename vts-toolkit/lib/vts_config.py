@@ -32,10 +32,28 @@ DEFAULTS = {
 
 
 def config_path() -> Path:
-    data = os.environ.get("CLAUDE_PLUGIN_DATA")
-    base = Path(data) if data else Path.home() / ".vts-toolkit"
+    """Config lives in a FIXED home, not CLAUDE_PLUGIN_DATA.
+
+    Setup frequently runs before the plugin is loaded into a session (immediately
+    after install, before a restart), and CLAUDE_PLUGIN_DATA is unset at that point.
+    Keying off it would write config somewhere the loaded plugin never looks, so the
+    user's whole setup would vanish on restart. A stable home also survives updates.
+    """
+    base = Path(os.environ.get("VTS_TOOLKIT_HOME") or Path.home() / ".vts-toolkit")
     base.mkdir(parents=True, exist_ok=True)
-    return base / "vts-config.json"
+    target = base / "vts-config.json"
+
+    # One-time migration for anyone set up under the old CLAUDE_PLUGIN_DATA scheme.
+    if not target.exists():
+        legacy_dir = os.environ.get("CLAUDE_PLUGIN_DATA")
+        if legacy_dir:
+            legacy = Path(legacy_dir) / "vts-config.json"
+            if legacy.exists():
+                try:
+                    target.write_text(legacy.read_text())
+                except OSError:
+                    pass
+    return target
 
 
 def load() -> dict:

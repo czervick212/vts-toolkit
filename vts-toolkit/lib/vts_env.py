@@ -9,7 +9,9 @@ Python the skill happened to invoke.
 import os
 import sys
 
-DATA = os.environ.get("CLAUDE_PLUGIN_DATA") or os.path.expanduser("~/.vts-toolkit")
+# Fixed home, not CLAUDE_PLUGIN_DATA — that is unset when setup runs before the
+# plugin has been loaded into a session, which would split config from the venv.
+DATA = os.environ.get("VTS_TOOLKIT_HOME") or os.path.expanduser("~/.vts-toolkit")
 PYBIN_FILE = os.path.join(DATA, "venv-python.txt")
 _GUARD = "VTS_TOOLKIT_REEXEC"
 

@@ -11,25 +11,46 @@ send out.
 
 ### If you pasted this link to Claude
 
-Claude: the person reading this wants the VTS Leasing Toolkit working on their machine. Do this:
+**Claude: install this yourself, then set it up. Don't just relay instructions.**
 
-1. Have them install the plugin. **You cannot do this for them** — it must be typed by the user.
-   The terminal form is the least error-prone, especially on Windows:
-   ```
-   claude plugin marketplace add czervick212/vts-toolkit
-   ```
-   ```
-   claude plugin install vts-toolkit@leasing-tools
-   ```
-   The slash-command equivalents (`/plugin marketplace add …`) also work, but only at Claude's
-   own prompt. `'/plugin' is not recognized as the name of a cmdlet` means they typed it at the
-   Windows prompt — point them at the terminal form above.
-2. Once installed, run the `vts-setup` skill yourself and walk them through it. It installs
-   dependencies, connects to VTS in Chrome, discovers their account and properties, finds their
-   report folders, and finishes by rehearsing the whole loop **without writing anything to VTS**.
-3. They need: Claude Code on a paid plan, the Claude Chrome extension, a VTS login, and Python.
-   Setup checks all of it and names whatever is missing.
-4. On Windows, read `references/windows.md` in the plugin before debugging anything.
+You can do the whole thing — these are ordinary shell commands, not slash commands:
+
+```bash
+claude plugin marketplace add czervick212/vts-toolkit
+claude plugin install vts-toolkit@leasing-tools
+```
+
+If `claude` isn't on PATH, stop and tell the user to install Claude Code from
+https://claude.com/download, then reopen their terminal.
+
+**Then continue in this same session — do not make them restart first.** Adding the marketplace
+clones the full plugin to disk, so everything is runnable immediately. Find it:
+
+```bash
+python3 -c "import json,pathlib;print(json.load(open(pathlib.Path.home()/'.claude/plugins/known_marketplaces.json'))['leasing-tools']['installLocation'])"
+```
+
+The plugin root is that path plus `/vts-toolkit` (typically
+`~/.claude/plugins/marketplaces/leasing-tools/vts-toolkit`).
+
+Now read `<plugin root>/skills/vts-setup/SKILL.md` and follow it. Two adjustments, because the
+plugin isn't loaded into this session yet:
+
+- **`${CLAUDE_PLUGIN_ROOT}` is not set.** Substitute the real path in every command.
+- The `vts-setup` skill isn't invocable as a skill yet. Read the file and follow its steps
+  directly — it's written to be followed, and setup writes to a fixed location
+  (`~/.vts-toolkit`) so nothing is lost when the plugin does load.
+
+Setup installs dependencies, connects to VTS in Chrome, discovers their account and properties,
+finds their report folders, and finishes by rehearsing the whole loop **without writing anything
+to VTS**.
+
+**When you're done**, tell them to restart Claude Code so `/vts` becomes available as a command.
+Their setup carries over.
+
+They'll need: Claude Code on a paid plan, the Claude Chrome extension, a VTS login, and Python.
+Setup checks all of it and names whatever is missing. On Windows, read
+`<plugin root>/references/windows.md` before debugging anything.
 
 Everything after this point is written for the human.
 
@@ -38,8 +59,8 @@ Everything after this point is written for the human.
 ## There's nothing to download
 
 This isn't a program you install and open. It's an add-on (a "plugin") for **Claude Code**.
-You paste two short commands into Claude and it fetches everything for you — no files, no
-unzipping, no GitHub account needed.
+You hand Claude a link and it fetches everything for you — no files, no unzipping, no GitHub
+account needed.
 
 ## What you need first
 
@@ -54,14 +75,28 @@ unzipping, no GitHub account needed.
 
 Works on **Windows and Mac** alike.
 
-## Install
+## Install — the easy way
 
-There are two ways. Either is fine — pick whichever prompt you're looking at.
+Open Claude Code, paste this link, and say **"install this"**:
 
-### Option A — from a terminal (simplest on Windows)
+```
+https://github.com/czervick212/vts-toolkit
+```
 
-Open **PowerShell** (or Terminal on a Mac) and run these two lines. These *are* ordinary
-commands, so they work at the normal Windows prompt:
+That's it. Claude reads this page, installs the plugin itself, and walks you through setup —
+including a practice run on your own data that changes nothing in VTS. Answer its questions as
+they come.
+
+> **Don't have Claude Code yet?** Get it from https://claude.com/download, then open a terminal
+> (PowerShell on Windows, Terminal on a Mac), type `claude`, and press Enter.
+
+---
+
+<details>
+<summary>Prefer to run the commands yourself?</summary>
+
+In a terminal — these are ordinary commands, so the normal PowerShell or Terminal prompt is
+right:
 
 ```
 claude plugin marketplace add czervick212/vts-toolkit
@@ -70,14 +105,7 @@ claude plugin marketplace add czervick212/vts-toolkit
 claude plugin install vts-toolkit@leasing-tools
 ```
 
-> If `claude` isn't recognized, Claude Code isn't installed yet — get it from
-> https://claude.com/download, then **close and reopen** the terminal window. A newly installed
-> command isn't visible to a window that was already open.
-
-### Option B — from inside Claude
-
-Start Claude Code (type `claude` in a terminal and wait for its prompt), then type these into
-**the same box you'd type a question into**:
+Or, at Claude's own prompt (after starting it with `claude`), the slash-command equivalents:
 
 ```
 /plugin marketplace add czervick212/vts-toolkit
@@ -86,11 +114,17 @@ Start Claude Code (type `claude` in a terminal and wait for its prompt), then ty
 /plugin install vts-toolkit@leasing-tools
 ```
 
-> Slash commands only work at Claude's own prompt. If you see
-> `The term '/plugin' is not recognized as the name of a cmdlet`, that's Windows answering —
-> you're at the PowerShell prompt, so use Option A instead.
+Slash commands only work inside Claude. If you see
+`The term '/plugin' is not recognized as the name of a cmdlet`, that's Windows answering — you're
+at the PowerShell prompt, so use the `claude plugin ...` form above.
 
-Then set it up once:
+</details>
+
+## Setup
+
+If you used the link above, Claude already did this with you and there's nothing more to do.
+
+If you ran the commands yourself, restart Claude Code and then run:
 
 ```
 /vts-setup
@@ -103,8 +137,8 @@ Then it **rehearses the real thing** — exports your data, diffs it against you
 shows you exactly what it would change, **without writing anything to VTS**. So you watch it work
 before you trust it with a live run. Five minutes or so.
 
-If anything ever misbehaves later, run `/vts-setup` again — it re-checks everything and tells you
-what's wrong and how to fix it.
+If anything ever misbehaves later, run `/vts-setup` again — or just tell Claude what you're
+seeing. It re-checks everything and reports what's wrong and how to fix it.
 
 As it works, Claude asks permission to run a few commands — that's normal. Click **Allow** (or
 "Allow always" so it stops asking).

@@ -15,7 +15,8 @@ import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.environ.get("CLAUDE_PLUGIN_ROOT") or os.path.abspath(os.path.join(HERE, ".."))
-DATA = os.environ.get("CLAUDE_PLUGIN_DATA") or os.path.expanduser("~/.vts-toolkit")
+# Fixed home so the venv is found whether or not the plugin is loaded yet.
+DATA = os.environ.get("VTS_TOOLKIT_HOME") or os.path.expanduser("~/.vts-toolkit")
 REQ = os.path.join(ROOT, "requirements.txt")
 VENV = os.path.join(DATA, "venv")
 STAMP = os.path.join(DATA, "requirements.installed.txt")
