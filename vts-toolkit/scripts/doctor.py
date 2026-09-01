@@ -128,34 +128,11 @@ def run():
         check("Your properties", FAIL, "none found yet",
               "Run /vts-setup in Claude — it pulls your whole list from VTS.")
     else:
-        with_folder = sum(1 for p in props if p.get("folder"))
-        check("Your properties", OK, f"{len(props)} found, {with_folder} linked to a report folder")
+        active = sum(1 for p in props if not p.get("archived"))
+        check("Your properties", OK, f"{len(props)} found, {active} active")
 
-    # --- paths -----------------------------------------------------------
-    root = cfg.get("paths", {}).get("landlord_root")
-    if not root:
-        # Optional by design: plenty of people never save leasing reports.
-        check("Report folder", OK, "not set (fine — reports go to Downloads)")
-    elif not Path(root).expanduser().is_dir():
-        check("Report folder", FAIL, f"can't be found: {root}",
-              "The folder may have been moved or renamed, or a cloud folder may not "
-              "have synced to this computer yet. Open it once in Finder or File "
-              "Explorer, then run /vts-setup again.")
-    else:
-        check("Report folder", OK, root)
-
-    for p in props:
-        f = p.get("folder")
-        if f and not Path(f).expanduser().is_dir():
-            check(f'Folder for {p["name"]}', FAIL, f"can't be found: {f}",
-                  "That folder moved, was renamed, or hasn't synced to this "
-                  "computer. Run /vts-setup again to re-link it.")
-
-    try:
-        import vts_paths as _vp
-        dl = _vp.downloads_dir()
-    except Exception:
-        dl = Path.home() / "Downloads"
+    # --- where the export lands ------------------------------------------
+    dl = Path.home() / "Downloads"
     if dl.is_dir():
         check("Downloads folder", OK, str(dl))
     else:

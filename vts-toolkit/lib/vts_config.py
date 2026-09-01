@@ -8,8 +8,7 @@ are discovered.
 Usage:
     python3 lib/vts_config.py show
     python3 lib/vts_config.py set user.id 12345 user.name "Jane Broker"
-    python3 lib/vts_config.py add-property "Main Street Plaza" 100200 \
-        --address "Bethesda, MD" --folder "~/Dropbox/Landlords/.../Leasing Updates"
+    python3 lib/vts_config.py add-property "Main Street Plaza" 100200 --address "Bethesda, MD"
     python3 lib/vts_config.py find-property "fairfax"
     python3 lib/vts_config.py archive "Rockville BMW"     # hide a property you've leased
     python3 lib/vts_config.py list-properties [--all]
@@ -21,7 +20,6 @@ from pathlib import Path
 
 DEFAULTS = {
     "user": {"id": None, "name": None},
-    "paths": {"landlord_root": None},
     # VTS taxonomy ids. Seeded from the account they were discovered on;
     # vts-setup re-probes them and overwrites if this account differs.
     "ids": {
@@ -93,7 +91,7 @@ def _dig(cfg, dotted, value):
     cur[parts[-1]] = value
 
 
-def add_property(cfg, name, prop_id, address=None, folder=None):
+def add_property(cfg, name, prop_id, address=None):
     """Upsert a property, keyed on the VTS id.
 
     Identity is the id, never the name: VTS accounts really do carry two assets with
@@ -107,14 +105,10 @@ def add_property(cfg, name, prop_id, address=None, folder=None):
             p.update({"name": name, "id": prop_id})
             if address:
                 p["address"] = address
-            if folder:
-                p["folder"] = folder
             return p
     entry = {"name": name, "id": prop_id}
     if address:
         entry["address"] = address
-    if folder:
-        entry["folder"] = folder
     cfg["properties"].append(entry)
     return entry
 
@@ -179,13 +173,11 @@ def main(argv):
 
     if cmd == "add-property":
         name, prop_id = rest[0], rest[1]
-        address = folder = None
+        address = None
         for i, a in enumerate(rest):
             if a == "--address":
                 address = rest[i + 1]
-            if a == "--folder":
-                folder = rest[i + 1]
-        entry = add_property(cfg, name, prop_id, address, folder)
+        entry = add_property(cfg, name, prop_id, address)
         save(cfg)
         print(json.dumps(entry, indent=2))
         return 0

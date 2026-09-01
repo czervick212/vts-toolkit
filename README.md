@@ -159,10 +159,9 @@ It asks you to drop in your edited spreadsheet, then:
 3. On your OK: posts your comments, moves stages, creates any new deals you added
 4. Re-exports and formats the finished report for the landlord
 
-**You don't need to save reports anywhere.** If you export, send it to the landlord and delete it
-— that's the normal case. Hand over whichever file you edited and the finished one comes back in
-your Downloads. If you *do* keep a folder per property, tell Claude once and it files them there
-instead.
+**You don't need to save reports anywhere.** It never goes looking through your folders. You hand
+it the file you edited, it updates VTS, and it hands you back a finished report in your Downloads.
+That's the whole thing.
 
 **It always shows you the plan before writing anything.** These changes land in a client's system
 of record with your name on the audit trail, so nothing gets pushed until you say go.

@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
-"""Cross-platform path lookups for the VTS toolkit.
+"""Locate the VTS export the browser just downloaded.
 
-Replaces the `find` / `ls -t` shell calls the skill used to make, which only
-existed on macOS. Everything here works identically on Windows, macOS and Linux.
+The toolkit does not go looking for the user's own files — they hand those over.
+The one thing worth finding is the export we just triggered, and Windows lets the
+Downloads folder be redirected, so ask the OS rather than assuming.
 
-    python3 lib/vts_paths.py roots
-    python3 lib/vts_paths.py find-folders "<root>" --name "Leasing Updates" --match fairfax
-    python3 lib/vts_paths.py newest "<folder>" --ext .xlsx
-    python3 lib/vts_paths.py downloads --prefix leasing-activity
+    python3 lib/vts_paths.py downloads [--all]
+    python3 lib/vts_paths.py newest "<folder>"      # only when a folder is given explicitly
 """
 import argparse
 import json
@@ -15,51 +14,9 @@ import os
 import sys
 from pathlib import Path
 
-# Cloud-sync roots people actually keep landlord folders in.
-ROOT_CANDIDATES = ["Dropbox", "Documents", "Box", "Google Drive"]
-
-
 def expand(p) -> Path:
     """Windows shells don't expand ~, so do it ourselves, always."""
     return Path(p).expanduser().resolve()
-
-
-def roots():
-    home = Path.home()
-    found = []
-    for name in ROOT_CANDIDATES:
-        d = home / name
-        if d.is_dir():
-            found.append(str(d))
-        # These often carry a company suffix, e.g. "Dropbox - Acme"
-        found.extend(
-            str(x) for x in home.glob(f"{name} - *") if x.is_dir()
-        )
-    return found
-
-
-def find_folders(root, name, match=None, max_depth=4):
-    root = expand(root)
-    if not root.is_dir():
-        return []
-    hits = []
-    name_l = name.lower()
-    match_l = match.lower() if match else None
-    root_depth = len(root.parts)
-    for d in root.rglob("*"):
-        try:
-            if not d.is_dir():
-                continue
-            if len(d.parts) - root_depth > max_depth:
-                continue
-            if d.name.lower() != name_l:
-                continue
-            if match_l and match_l not in str(d).lower():
-                continue
-            hits.append(str(d))
-        except (PermissionError, OSError):
-            continue
-    return sorted(hits)
 
 
 def newest(folder, ext=".xlsx", prefix=None):
@@ -110,14 +67,6 @@ def main(argv):
     ap = argparse.ArgumentParser(description=__doc__)
     sub = ap.add_subparsers(dest="cmd", required=True)
 
-    sub.add_parser("roots")
-
-    f = sub.add_parser("find-folders")
-    f.add_argument("root")
-    f.add_argument("--name", default="Leasing Updates")
-    f.add_argument("--match")
-    f.add_argument("--max-depth", type=int, default=4)
-
     n = sub.add_parser("newest")
     n.add_argument("folder")
     n.add_argument("--ext", default=".xlsx")
@@ -129,16 +78,6 @@ def main(argv):
     d.add_argument("--all", action="store_true")
 
     a = ap.parse_args(argv)
-
-    if a.cmd == "roots":
-        r = roots()
-        print(json.dumps(r, indent=2))
-        return 0 if r else 3
-
-    if a.cmd == "find-folders":
-        hits = find_folders(a.root, a.name, a.match, a.max_depth)
-        print(json.dumps(hits, indent=2))
-        return 0 if hits else 3
 
     if a.cmd == "newest":
         hit = newest(a.folder, a.ext, a.prefix)

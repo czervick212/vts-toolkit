@@ -113,40 +113,7 @@ write the config JSON directly rather than using `set`.
 
 Tell them how many properties came back. If it's a surprising number, that's worth catching now.
 
-## Phase 5 — Where reports live (optional — often "nowhere")
-
-**Ask before searching, and be ready for "I don't keep them."**
-
-> When you finish a leasing report, do you save it somewhere — a folder per property — or do you
-> just send it to the landlord and move on?
-
-Both answers are fine and the toolkit works identically. **Most people don't keep them**, and
-that is the expected answer, not a problem. If they don't:
-
-- Skip this phase entirely. Say so plainly: *"No problem — I'll ask you for the file each time,
-  and the finished report will land in your Downloads."*
-- Do **not** go crawling Dropbox for folders that don't exist. That was an early mistake: it
-  produced a run of failed searches that made the tool look broken before it had done anything.
-
-If they *do* file reports per property, record where, so future runs skip the asking:
-
-```bash
-python3 "${CLAUDE_PLUGIN_ROOT}/lib/vts_paths.py" roots
-python3 "${CLAUDE_PLUGIN_ROOT}/lib/vts_paths.py" find-folders "<root>" --name "<their folder name>"
-```
-
-Their folders may not be called "Leasing Updates" — ask what they use and pass `--name`.
-
-```bash
-python3 "${CLAUDE_PLUGIN_ROOT}/lib/vts_config.py" set paths.landlord_root "<their root>"
-python3 "${CLAUDE_PLUGIN_ROOT}/lib/vts_config.py" add-property "<name>" <id> --folder "<path>"
-```
-
-**If their folders are cloud-synced**, mention that files which haven't downloaded show as 0
-bytes — a report that reads as empty produces a diff claiming every deal is new. The toolkit
-catches it, but it's worth knowing.
-
-## Phase 6 — Rehearsal (this is the point)
+## Phase 5 — Rehearsal (this is the point)
 
 Everything above is configuration. This is where they watch it actually work — a complete pass
 through the real loop on their own data that **writes nothing to VTS**.
@@ -154,7 +121,7 @@ through the real loop on their own data that **writes nothing to VTS**.
 Pick any property with deals in VTS. **No saved report needed** — the rehearsal works whether or
 not they keep them.
 
-**6a. Read their deals back.** Proves the session and the property ID together:
+**5a. Read their deals back.** Proves the session and the property ID together:
 
 ```js
 const H={'Accept':'application/json','X-Requested-With':'XMLHttpRequest'};
@@ -169,7 +136,7 @@ A deal count and real tenant names means reads work. **The response is an object
 rows are under `.activity_logs`; treating it as an array yields zero deals and looks like an auth
 failure.
 
-**6b. Export from VTS.** Walk them through it once, because the trap here is expensive:
+**5b. Export from VTS.** Walk them through it once, because the trap here is expensive:
 **Export → Leasing Activity Excel → Export.** Do **not** click the settings dialog's left-nav
 tabs — they are real links that navigate the page underneath and silently strip the `properties=`
 filter, widening the export from one property to their entire portfolio.
@@ -178,7 +145,7 @@ filter, widening the export from one property to their entire portfolio.
 python3 "${CLAUDE_PLUGIN_ROOT}/lib/vts_paths.py" downloads
 ```
 
-**6c. Parse it.** First real exercise of the scripts and the venv:
+**5c. Parse it.** First real exercise of the scripts and the venv:
 
 ```bash
 python3 "${CLAUDE_PLUGIN_ROOT}/skills/vts/scripts/parse_report.py" "<the export>"
@@ -187,16 +154,16 @@ python3 "${CLAUDE_PLUGIN_ROOT}/skills/vts/scripts/parse_report.py" "<the export>
 Should print the property title, the as-of date, and a deal count matching 6a. If the count
 disagrees with VTS, the export was filtered differently — sort that out now, not mid-run.
 
-**6d. Prove the diff.**
+**5d. Prove the diff.**
 
-If they have an edited or previously-sent report to hand, diff it against the fresh export — the
-real thing:
+If they happen to have an edited or previously-sent report handy, diff it against the fresh
+export — the real thing:
 
 ```bash
 python3 "${CLAUDE_PLUGIN_ROOT}/skills/vts/scripts/plan_changes.py" "<their report>" "<the export>"
 ```
 
-**If they don't keep reports, diff the export against itself.** It should report zero changes in
+**Otherwise diff the export against itself** — most people won't have one. It should report zero changes in
 every bucket, which proves the machinery end-to-end and is a genuinely useful demonstration:
 
 ```bash
@@ -216,15 +183,15 @@ Interpret whatever you get with them:
   print the property title on line one; compare them. Catching this here is exactly why the
   rehearsal exists.
 
-**6e. Rehearse the finish**, which is genuinely non-destructive:
+**5e. Rehearse the finish**, which is genuinely non-destructive:
 
 ```bash
 python3 "${CLAUDE_PLUGIN_ROOT}/skills/vts/scripts/finalize_report.py" "<the export>" --dry-run
 ```
 
-Shows the sheet it would strip, the filename, and where it would land — Downloads, unless they
-gave a folder in Phase 5, in which case pass that folder too. Ask whether the proposed filename
-is what they'd want to send a landlord; `--name "<Property>"` overrides it.
+Shows the sheet it would strip, the filename, and where it would land: next to the export, in
+Downloads. Ask whether that filename is what they'd want to send a landlord — `--name` overrides
+it, and `--out` puts it elsewhere, but only if they ask.
 
 **Stop here. Do not push anything.** The rehearsal ends before any write.
 
@@ -253,7 +220,7 @@ Then act on it. Most failures resolve to one of four things:
 The technical detail in brackets is for you, not them. Use it to diagnose, but lead with the
 plain sentence.
 
-## Phase 7 — Confirm and hand over
+## Phase 6 — Confirm and hand over
 
 ```bash
 python3 "${CLAUDE_PLUGIN_ROOT}/scripts/doctor.py"
@@ -265,10 +232,10 @@ a confusing error mid-run later.
 Then tell them, briefly:
 
 - Who they're signed in to VTS as
-- How many properties were found (and, only if they file reports, how many have a folder)
+- How many properties were found
 - What the rehearsal showed (in sync / N pending edits / a mismatch caught)
 - That the command is `/vts <property name>`, or plain English like *"run the leasing update for
-  Main Street Plaza"*
+  Main Street Plaza"*, and that it will ask them to drop in their edited spreadsheet
 - That `/vts` **always previews the full plan before writing**, so they get a checkpoint on the
   first real run
 - That the **write** paths — posting comments, moving stages, creating deals — are exercised for
