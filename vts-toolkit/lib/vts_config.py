@@ -92,9 +92,16 @@ def _dig(cfg, dotted, value):
 
 
 def add_property(cfg, name, prop_id, address=None, folder=None):
+    """Upsert a property, keyed on the VTS id.
+
+    Identity is the id, never the name: VTS accounts really do carry two assets with
+    the same name (a redeveloped site listed twice, say). Matching on name would make
+    the second silently overwrite the first, and the folder mapping would follow the
+    wrong asset.
+    """
     prop_id = int(prop_id)
     for p in cfg["properties"]:
-        if p["id"] == prop_id or p["name"].lower() == name.lower():
+        if p["id"] == prop_id:
             p.update({"name": name, "id": prop_id})
             if address:
                 p["address"] = address

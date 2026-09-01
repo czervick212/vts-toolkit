@@ -54,7 +54,7 @@ Resolve the property argument against config:
 python3 "${CLAUDE_PLUGIN_ROOT}/lib/vts_config.py" find-property "<argument>"
 ```
 
-One hit, use it. Several, ask which. None, see *Finding a property that isn't in config* below.
+One hit, use it. Several, ask which — names are not unique in VTS, so two entries can share a name and differ only by id and address. None, see *Finding a property that isn't in config* below.
 
 ## Before anything else
 

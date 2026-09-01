@@ -1,7 +1,7 @@
 {
   "name": "vts-toolkit",
   "displayName": "VTS Leasing Toolkit",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Collapse the biweekly VTS leasing-update loop into one edit: export from VTS, edit comments in Excel, push the changes back through the VTS JSON API, and re-export a clean report for the landlord.",
   "author": {
     "name": "Leasing Tools"
