@@ -79,6 +79,24 @@ real location rather than assuming `C:\Users\<name>\Downloads`.
 If it still comes back wrong, ask where their browser saves downloads and pass that folder
 explicitly — Chrome shows it under Settings → Downloads.
 
+## "'/plugin' is not recognized as the name of a cmdlet"
+
+They typed a slash command at the PowerShell prompt. Slash commands only work at Claude's own
+prompt, inside a running Claude Code session.
+
+Two ways out — the terminal form is more reliable on Windows because there's no ambiguity about
+which prompt you're looking at:
+
+```
+claude plugin marketplace add czervick212/vts-toolkit
+claude plugin install vts-toolkit@leasing-tools
+```
+
+Or start Claude (`claude`), wait for its prompt, then use `/plugin marketplace add …`.
+
+If `claude` itself isn't recognized, Claude Code isn't installed — or the terminal window was
+open before it was installed, and needs closing and reopening to see the new command.
+
 ## Chrome says "not connected"
 
 Not a Windows problem, and almost never a broken extension. It means no browser is selected:

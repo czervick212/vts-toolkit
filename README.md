@@ -13,14 +13,17 @@ send out.
 
 Claude: the person reading this wants the VTS Leasing Toolkit working on their machine. Do this:
 
-1. Tell them to paste these two lines into Claude Code, one at a time. **You cannot run these
-   for them** — `/plugin` commands must be typed by the user:
+1. Have them install the plugin. **You cannot do this for them** — it must be typed by the user.
+   The terminal form is the least error-prone, especially on Windows:
    ```
-   /plugin marketplace add czervick212/vts-toolkit
+   claude plugin marketplace add czervick212/vts-toolkit
    ```
    ```
-   /plugin install vts-toolkit@leasing-tools
+   claude plugin install vts-toolkit@leasing-tools
    ```
+   The slash-command equivalents (`/plugin marketplace add …`) also work, but only at Claude's
+   own prompt. `'/plugin' is not recognized as the name of a cmdlet` means they typed it at the
+   Windows prompt — point them at the terminal form above.
 2. Once installed, run the `vts-setup` skill yourself and walk them through it. It installs
    dependencies, connects to VTS in Chrome, discovers their account and properties, finds their
    report folders, and finishes by rehearsing the whole loop **without writing anything to VTS**.
@@ -34,7 +37,7 @@ Everything after this point is written for the human.
 
 ## There's nothing to download
 
-This isn't a program you install and open. It's an add-on (a "plugin") for the **Claude** app.
+This isn't a program you install and open. It's an add-on (a "plugin") for **Claude Code**.
 You paste two short commands into Claude and it fetches everything for you — no files, no
 unzipping, no GitHub account needed.
 
@@ -51,7 +54,30 @@ unzipping, no GitHub account needed.
 
 Works on **Windows and Mac** alike.
 
-## Install — paste these into Claude, one at a time
+## Install
+
+There are two ways. Either is fine — pick whichever prompt you're looking at.
+
+### Option A — from a terminal (simplest on Windows)
+
+Open **PowerShell** (or Terminal on a Mac) and run these two lines. These *are* ordinary
+commands, so they work at the normal Windows prompt:
+
+```
+claude plugin marketplace add czervick212/vts-toolkit
+```
+```
+claude plugin install vts-toolkit@leasing-tools
+```
+
+> If `claude` isn't recognized, Claude Code isn't installed yet — get it from
+> https://claude.com/download, then **close and reopen** the terminal window. A newly installed
+> command isn't visible to a window that was already open.
+
+### Option B — from inside Claude
+
+Start Claude Code (type `claude` in a terminal and wait for its prompt), then type these into
+**the same box you'd type a question into**:
 
 ```
 /plugin marketplace add czervick212/vts-toolkit
@@ -59,6 +85,10 @@ Works on **Windows and Mac** alike.
 ```
 /plugin install vts-toolkit@leasing-tools
 ```
+
+> Slash commands only work at Claude's own prompt. If you see
+> `The term '/plugin' is not recognized as the name of a cmdlet`, that's Windows answering —
+> you're at the PowerShell prompt, so use Option A instead.
 
 Then set it up once:
 
