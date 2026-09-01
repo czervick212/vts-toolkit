@@ -99,7 +99,10 @@ def target_name(out_dir, today, fallback_name, match_convention=True):
             stamp = f"{today.month}{sep}{today.day}{sep}{today.strftime('%y')}"
             return f"{m.group('prefix')}{stamp}.xlsx", f
     base = ILLEGAL.sub("", str(fallback_name or "Property")).strip() or "Property"
-    return f"{base} Leasing Update {stamp_dot}.xlsx"[:200], None
+    # Don't append the boilerplate twice when the name already carries it —
+    # --name "Waldorf Leasing Update" should not become "... Leasing Update Leasing Update".
+    suffix = "" if "leasing update" in base.lower() else " Leasing Update"
+    return f"{base}{suffix} {stamp_dot}.xlsx"[:200], None
 
 
 def finalize(raw_path, folder=None, date=None, dry_run=False, name=None):
