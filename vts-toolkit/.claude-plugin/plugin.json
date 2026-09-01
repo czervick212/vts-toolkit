@@ -1,7 +1,7 @@
 {
   "name": "vts-toolkit",
   "displayName": "VTS Leasing Toolkit",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "description": "We all hate using VTS. This makes it easier. Write your comments on an old leasing update, hand it over, and Claude pushes them into VTS and gives you back a clean report to send.",
   "author": {
     "name": "Leasing Tools"

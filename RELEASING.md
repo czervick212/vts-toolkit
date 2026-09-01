@@ -46,6 +46,7 @@ Simplest thing to tell a user: *"ask Claude to update the VTS toolkit."* It can 
 
 | Version | Change |
 |---|---|
+| 0.5.3 | Document that tenant_id is ignored on deal creation (tested) |
 | 0.5.2 | Rewrote the pitch copy |
 | 0.5.1 | Stop doubling "Leasing Update" when --name already contains it |
 | 0.5.0 | No file-finding at all — you give it a file, it returns a file |

@@ -317,6 +317,19 @@ Confirm the list first, then `POST /activity_logs` per deal and read the list ba
 normalized tenant names. If a new deal is Dead, create it as `initial_inquiry` first, then post the
 stage change with its reason — the create endpoint does not take a dead-deal reason.
 
+**`tenant_id` does not work — tested 2026-09-01 and confirmed ignored.** Posting a real
+`tenant_id` alongside a different name string produced a deal named from the *string*, with a
+brand-new tenant record minted and a different id returned. There is no way to attach a new deal
+to an existing tenant record through this endpoint. The raw string is the only path.
+
+Two consequences worth knowing:
+
+- **Every deal created this way mints a new tenant record.** So does the UI's "Add custom tenant".
+  Expect the account's tenant list to accumulate near-duplicates over time; that is the mechanism.
+- **Deals can be hard-deleted** — `DELETE /activity_logs/<id>` returns 200 and removes it from the
+  asset. That does not change the rule in Step 3: never delete a deal because a spreadsheet row
+  went missing. Being able to isn't a reason to.
+
 Tenant name goes in verbatim as `tenant`, with `custom_tenant_name: null`. This matches what the
 UI's **"Cannot find tenant? Add custom tenant"** link does, and it is the point: the Tenant search
 box is a fuzzy match over VTS's global company directory that *never reports a miss* — typing a
