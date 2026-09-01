@@ -429,20 +429,36 @@ VTS.
 
 ## Reference
 
-**Report layout** — single sheet, sections in funnel order (`Proposals`, `Touring`, `Inquiries`,
-`Idle`, `Dead Deals`), each with a stage header, a column header row, then data:
+**Report layout** — a single sheet of repeating blocks: a stage heading, a column header row,
+then data rows. Above the first block sit the property title and `All active deals as of MM/DD/YY`.
 
-| Col | Content |
+| Column label | Content |
 |---|---|
-| C | Tenant — `Name\nCategory\n` (the category line is the VTS Industry value) |
-| D | Broker — `Name\nFirm` |
-| E | Tenant contact |
-| F | Inquiry type |
-| G | Size |
-| H | Comments — `MM/DD/YY - body`, latest comment only |
+| Tenant | `Name\nCategory\n` — the category line is the VTS Industry value |
+| Broker | `Name\nFirm` |
+| Tenant contact | |
+| Inquiry type | |
+| Size | |
+| Comments | `MM/DD/YY - body`, latest comment only |
 
-C1 is the property title, C2 is `All active deals as of MM/DD/YY`. Untouched rows keep their
-original date prefix, so the prefix doubles as a record of when each deal was last worked.
+**Columns are found by their header label, never by position, and neither should you.** Which
+fields appear is a per-user VTS setting ("Deal and proposal details"), so a colleague who doesn't
+tick Broker gets a sheet where every later column shifts left. VTS fixes the *labels*, which is
+why they're the reliable anchor. `parse_report.py` prints the columns it found and names any that
+are absent — check that line if a run looks wrong.
+
+Absent fields come back as empty strings rather than shifted data. Tenant and Comments are
+required; the parser stops with an explanation if either is missing, since the first is the join
+key and the second is the entire point of the round trip.
+
+Section headings are detected structurally — a single-value row directly above a header row —
+rather than matched against a fixed list of stage names, so custom or renamed VTS stages parse
+correctly. (An earlier version matched a hardcoded list, which turned the unlisted `Prospects`
+heading into a phantom deal named "Prospects" and filed that section's deals under the previous
+stage. A push would have created that deal in the landlord's VTS.)
+
+Untouched rows keep their original date prefix, so the prefix doubles as a record of when each
+deal was last worked.
 
 **Scripts** (under `${CLAUDE_PLUGIN_ROOT}/skills/vts/scripts/`):
 
